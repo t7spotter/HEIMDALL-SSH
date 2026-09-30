@@ -18,6 +18,16 @@
 
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
+  // Minimal monochrome line icons; they inherit the text colour.
+  const icon = (paths) =>
+    `<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+  const ICONS = {
+    palette: icon('<path d="M8 2S3.5 6.6 3.5 9.5a4.5 4.5 0 0 0 9 0C12.5 6.6 8 2 8 2z"/>'),
+    terminal: icon('<path d="M3 4.5l3.5 3.5L3 11.5M8.5 12h4.5"/>'),
+    close: icon('<path d="M4 4l8 8M12 4l-8 8"/>'),
+    eye: icon('<path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/>'),
+  };
+
   const SWATCHES = [0, 25, 45, 90, 150, 175, 200, 225, 260, 290, 320, 345];
   const autoHue = (name) => {
     let h = 0;
@@ -34,7 +44,7 @@
       <div class="bar"></div>
       <div class="head"><span class="dot"></span>
         <div class="title"><div class="name">${esc(s.name)}</div><div class="meta">connecting…</div></div>
-        <div class="icons"><button data-a="palette" title="Card colour">🎨</button><button data-a="terminal" title="Open terminal">&gt;_</button>${s.removable ? '<button data-a="remove" title="Remove / hide">✕</button>' : ''}</div>
+        <div class="icons"><button data-a="palette" title="Card colour">${ICONS.palette}</button><button data-a="terminal" title="Open terminal">${ICONS.terminal}</button>${s.removable ? `<button data-a="remove" title="Remove / hide">${ICONS.close}</button>` : ''}</div>
       </div><div class="swatches" hidden>${SWATCHES.map((h) => `<i data-hue="${h}" title="hue ${h}"></i>`).join('')}<i class="auto" data-hue="" title="Automatic">A</i></div>
       <div class="err" hidden></div>
       <div class="body"><div class="panel">
@@ -142,7 +152,7 @@
 
   function hiddenBar(n) {
     const el = document.getElementById('hidden');
-    el.innerHTML = n ? `<button>👁 ${n} hidden · Show…</button>` : '';
+    el.innerHTML = n ? `<button>${ICONS.eye}<span>${n} hidden · Show…</span></button>` : '';
     if (n) el.querySelector('button').onclick = () => vscode.postMessage({ type: 'unhide' });
   }
 

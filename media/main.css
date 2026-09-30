@@ -28,7 +28,7 @@ button { cursor: pointer; font: inherit; color: inherit; }
 .meta { font-size: 11px; opacity: .7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .err { font-size: 11px; padding: 0 10px 8px 26px; color: #ffb4ae; }
 .icons { display: flex; gap: 2px; }
-.icons button { background: none; border: 0; padding: 3px 7px; border-radius: 6px; font-size: 12px; opacity: .6; transition: background .15s, opacity .15s; }
+.icons button { display: flex; align-items: center; background: none; border: 0; padding: 5px 6px; border-radius: 6px; font-size: 12px; opacity: .6; transition: background .15s, opacity .15s; }
 .icons button:hover { opacity: 1; background: rgba(255, 255, 255, .14); }
 
 .panel { background: rgba(0, 0, 0, .22); padding: 8px 2px 4px; }
@@ -55,5 +55,5 @@ button { cursor: pointer; font: inherit; color: inherit; }
 .swatches i.auto { background: rgba(0, 0, 0, .3); }
 
 #hidden { text-align: center; }
-#hidden button { background: none; border: 0; padding: 4px 8px; font-size: 11px; opacity: .6; border-radius: 6px; }
+#hidden button { display: inline-flex; align-items: center; gap: 6px; background: none; border: 0; padding: 4px 8px; font-size: 11px; opacity: .6; border-radius: 6px; }
 #hidden button:hover { opacity: 1; background: var(--vscode-toolbar-hoverBackground); }

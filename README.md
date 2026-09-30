@@ -9,7 +9,7 @@ Each server gets a card with:
 - **Disk I/O** throughput and IOPS
 - OS, uptime and latency, plus a status dot (connecting / online / error)
 - A button to open an SSH terminal to that server
-- A 🎨 button to give each machine its own colour (saved per machine; **A** resets to automatic)
+- A colour button to give each machine its own colour (saved per machine; **A** resets to automatic)
 
 The machine VS Code is running on is shown too, as the first card.
 
@@ -93,8 +93,8 @@ npm run typecheck
 Press **F5** to launch an Extension Development Host. To package and install locally:
 
 ```sh
-npx vsce package --no-dependencies -o heimdall-ssh-0.1.6.vsix
-code --install-extension heimdall-ssh-0.1.6.vsix --force
+npx vsce package --no-dependencies -o heimdall-ssh-0.1.7.vsix
+code --install-extension heimdall-ssh-0.1.7.vsix --force
 ```
 
 ## License
