@@ -1,0 +1,36 @@
+:root { --ok: #4caf50; --warn: #e6b422; --bad: #e5534b; }
+body { padding: 8px; margin: 0; }
+.empty { text-align: center; opacity: .75; padding: 24px 8px; }
+button { cursor: pointer; font: inherit; color: inherit; }
+.add { margin-top: 10px; padding: 6px 12px; border: 0; border-radius: 4px;
+  background: var(--vscode-button-background); color: var(--vscode-button-foreground); }
+
+.card { background: var(--vscode-sideBar-background, transparent); border: 1px solid var(--vscode-widget-border, rgba(128,128,128,.3));
+  border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+.card.offline .body { opacity: .4; }
+.head { display: flex; align-items: flex-start; gap: 6px; padding: 8px 10px 4px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex: none; background: var(--warn); }
+.online .dot { background: var(--ok); } .error .dot { background: var(--bad); }
+.title { flex: 1; min-width: 0; }
+.name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.meta { font-size: 11px; opacity: .7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.err { font-size: 11px; color: var(--bad); padding: 0 10px 4px 24px; }
+.icons { display: flex; gap: 2px; }
+.icons button { background: none; border: 0; padding: 2px 5px; border-radius: 4px; opacity: .65; font-size: 13px; }
+.icons button:hover { opacity: 1; background: var(--vscode-toolbar-hoverBackground); }
+
+.gauges { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 0; padding: 4px 6px; }
+@media (min-width: 300px) { .gauges { grid-template-columns: repeat(4, 1fr); } }
+.gauge { text-align: center; min-width: 0; }
+.gauge .lbl { font-size: 11px; opacity: .8; }
+.gauge .sub { font-size: 10px; opacity: .6; margin-top: -4px; }
+.gauge svg { width: 100%; max-width: 72px; display: block; margin: 0 auto; }
+.gauge .track { stroke: var(--vscode-editor-foreground); opacity: .12; fill: none; stroke-width: 9; stroke-linecap: round; }
+.gauge .fill { fill: none; stroke-width: 9; stroke-linecap: round; transition: stroke-dasharray .4s, stroke .4s; }
+.gauge text { fill: var(--vscode-foreground); font-size: 20px; font-weight: 600; text-anchor: middle; }
+
+.foot { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 6px 10px 8px; font-size: 10.5px;
+  border-top: 1px solid var(--vscode-widget-border, rgba(128,128,128,.2)); background: rgba(128,128,128,.06); }
+.foot div { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.foot b { font-weight: 600; display: block; font-size: 11px; }
+.foot span { opacity: .65; }
