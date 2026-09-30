@@ -81,8 +81,8 @@ npm run typecheck
 Press **F5** to launch an Extension Development Host. To package and install locally:
 
 ```sh
-npx vsce package --no-dependencies -o heimdall-ssh-0.1.0.vsix
-code --install-extension heimdall-ssh-0.1.0.vsix --force
+npx vsce package --no-dependencies -o heimdall-ssh-0.1.1.vsix
+code --install-extension heimdall-ssh-0.1.1.vsix --force
 ```
 
 ## License
