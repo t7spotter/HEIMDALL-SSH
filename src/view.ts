@@ -14,7 +14,10 @@ export class ServersView implements vscode.WebviewViewProvider {
 
   private servers(): ServerConfig[] {
     const manual = vscode.workspace.getConfiguration('heimdall').get<ServerConfig[]>('servers', []);
-    const hidden = new Set(vscode.workspace.getConfiguration('heimdall').get<string[]>('hiddenHosts', []));
+    const hidden = new Set([
+      ...vscode.workspace.getConfiguration('heimdall').get<string[]>('hiddenHosts', []),
+      ...this.autoHidden(),
+    ]);
     const fromSsh = readSshConfig().filter((h) => !isGitHost(h) && !hidden.has(h.alias)).map<ServerConfig>((h) => ({
       id: `ssh:${h.alias}`,
       name: h.alias,
@@ -28,6 +31,28 @@ export class ServersView implements vscode.WebviewViewProvider {
     // Stats come from shell tools available on Linux and macOS only.
     const local = process.platform === 'linux' || process.platform === 'darwin' ? [localConfig()] : [];
     return [...local, ...fromSsh, ...manual];
+  }
+
+  /** Hosts that logged in fine but turned out not to be servers (git hosts etc.). */
+  private autoHidden(): string[] {
+    return this.ctx.globalState.get<string[]>('heimdall.autoHidden', []);
+  }
+
+  async showHidden() {
+    await this.ctx.globalState.update('heimdall.autoHidden', []);
+    await vscode.workspace.getConfiguration('heimdall').update('hiddenHosts', [], vscode.ConfigurationTarget.Global);
+    this.syncMonitors();
+  }
+
+  private async autoHide(cfg: ServerConfig) {
+    if (!cfg.sshAlias) return; // manual servers stay visible and show the error instead
+    await this.ctx.globalState.update('heimdall.autoHidden', [...new Set([...this.autoHidden(), cfg.sshAlias])]);
+    this.syncMonitors();
+    const pick = await vscode.window.showInformationMessage(
+      `Heimdall-SSH hid "${cfg.name}": it accepts SSH but has no shell, so it isn't a server.`,
+      'Undo',
+    );
+    if (pick === 'Undo') await this.showHidden();
   }
 
   private get active() {
@@ -77,6 +102,7 @@ export class ServersView implements vscode.WebviewViewProvider {
           },
           intervalMs: () => Math.max(1, vscode.workspace.getConfiguration('heimdall').get<number>('refreshInterval', 3)) * 1000,
           onUpdate: (id, status, stats) => {
+            if (status.noShell) void this.autoHide(cfg);
             const snap = { status, stats: stats ?? this.latest.get(id)?.stats };
             this.latest.set(id, snap);
             this.view?.webview.postMessage({ type: 'update', id, ...snap });

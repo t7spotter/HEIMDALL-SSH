@@ -3,7 +3,7 @@ import { execFile } from 'child_process';
 import { existsSync, readFileSync } from 'fs';
 import { hostname } from 'os';
 import { homedir } from 'os';
-import { Sample, SCRIPT, Stats, parse } from './stats';
+import { NoShellError, Sample, SCRIPT, Stats, parse } from './stats';
 
 export interface ServerConfig {
   id: string;
@@ -19,7 +19,13 @@ export interface ServerConfig {
   local?: boolean;
 }
 
-export type Status = { state: 'connecting' | 'online' | 'error'; error?: string; latency?: number };
+export type Status = {
+  state: 'connecting' | 'online' | 'error';
+  error?: string;
+  latency?: number;
+  /** Host accepted the login but gave no shell (e.g. a git host); polling has stopped. */
+  noShell?: boolean;
+};
 
 export interface MonitorDeps {
   getPassword(id: string): Promise<string | undefined>;
@@ -50,11 +56,12 @@ export class Monitor {
   private prev?: Sample;
   private failures = 0;
   private gen = 0;
+  private blocked = false;
 
   constructor(readonly cfg: ServerConfig, private deps: MonitorDeps) {}
 
   start() {
-    if (this.running) return;
+    if (this.running || this.blocked) return;
     this.running = true;
     void this.connect();
   }
@@ -70,8 +77,15 @@ export class Monitor {
 
   restart() {
     this.stop();
+    this.blocked = false;
     this.failures = 0;
     this.start();
+  }
+
+  private noShell() {
+    this.blocked = true;
+    this.stop();
+    this.deps.onUpdate(this.cfg.id, { state: 'error', error: 'Accepts SSH but provides no shell (git host?)', noShell: true });
   }
 
   private fail(gen: number, err: string) {
@@ -181,7 +195,8 @@ export class Monitor {
     this.busy = true;
     const started = Date.now();
     this.client.exec(`sh -c ${shQuote(SCRIPT)}`, (err, stream) => {
-      if (err) return this.fail(gen, err.message);
+      // The server refused to run a command at all: a git host or restricted account, not a general server.
+      if (err) return /unable to exec/i.test(err.message) ? this.noShell() : this.fail(gen, err.message);
       let out = '';
       stream.on('data', (d: Buffer) => (out += d.toString()));
       stream.stderr.on('data', () => {});
@@ -194,6 +209,7 @@ export class Monitor {
           this.prev = sample;
           this.deps.onUpdate(this.cfg.id, { state: 'online', latency: now - started }, stats);
         } catch (e) {
+          if (e instanceof NoShellError) return this.noShell();
           return this.fail(gen, 'Could not parse server output');
         }
         this.timer = setTimeout(() => this.poll(gen), this.deps.intervalMs());

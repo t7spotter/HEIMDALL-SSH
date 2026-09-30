@@ -36,7 +36,7 @@ Or use **Extensions → ⋯ → Install from VSIX…**. To update later, click t
 ## Getting started
 
 1. Install the extension and click the **Heimdall-SSH** icon in the activity bar.
-2. Hosts from `~/.ssh/config` appear automatically. Entries that are only for git (`github.com`, `gitlab.com`, `bitbucket.org`, hosts with `User git`) are skipped. Click ✕ on a card to hide any other host; your config file is never modified. Edits to that file are picked up within a couple of seconds.
+2. Hosts from `~/.ssh/config` appear automatically. Entries that only exist for git (`github.com`, `gitlab.com`, hosts with `User git`, ...) are skipped, and any other host that accepts your key but refuses to run a shell is detected on first connect and hidden automatically, with an **Undo** button. Click ✕ on a card to hide a host yourself; your config file is never modified. Edits to that file are picked up within a couple of seconds.
 3. To add a server that isn't in your config, click **+** in the panel title and answer the prompts.
 
 ### Authentication
@@ -93,8 +93,8 @@ npm run typecheck
 Press **F5** to launch an Extension Development Host. To package and install locally:
 
 ```sh
-npx vsce package --no-dependencies -o heimdall-ssh-0.1.4.vsix
-code --install-extension heimdall-ssh-0.1.4.vsix --force
+npx vsce package --no-dependencies -o heimdall-ssh-0.1.5.vsix
+code --install-extension heimdall-ssh-0.1.5.vsix --force
 ```
 
 ## License

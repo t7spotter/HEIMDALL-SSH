@@ -25,6 +25,9 @@ export interface Sample {
   ioSectors: number;
 }
 
+/** The host answered, but not with stats: no shell (git host, forced-command account, ...). */
+export class NoShellError extends Error {}
+
 const LINUX = [
   'echo "##os"; (. /etc/os-release 2>/dev/null && echo "$PRETTY_NAME") || uname -sr',
   'echo "##up"; cut -d" " -f1 /proc/uptime',
@@ -68,6 +71,7 @@ export function parse(out: string, prev: Sample | undefined, now: number): { sta
       sections[cur].push(line);
     }
   }
+  if (!sections.up && !sections.os) throw new NoShellError('no stats in output');
   const one = (k: string) => (sections[k]?.[0] ?? '').trim();
 
   const cpuFields = one('stat').split(/\s+/).slice(1, 9).map(Number);
