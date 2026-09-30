@@ -55,7 +55,7 @@ The first time Heimdall connects to a server it remembers the host key. If the k
 
 ## How it works
 
-Heimdall keeps one SSH connection per server and, every few seconds, runs a single read-only command that reads `/proc` and `df`. Rates (CPU, network, disk) come from the difference between two readings. Polling pauses while the panel is hidden, and dropped connections reconnect automatically.
+Heimdall keeps one SSH connection per server and, every few seconds, runs a single read-only script (`/proc` and `df` on Linux; `sysctl`, `vm_stat`, `netstat` and `iostat` on macOS). Rates (CPU, network, disk) come from the difference between two readings. Polling pauses while the panel is hidden, and dropped connections reconnect automatically.
 
 Nothing is installed or left running on the server.
 
@@ -76,7 +76,8 @@ Nothing is installed or left running on the server.
 
 ## Limitations
 
-- Servers must be Linux (stats come from `/proc`). The local card is shown on Linux only.
+- Monitored servers (and the local card) must be Linux or macOS. Windows servers aren't supported; the extension itself runs fine on Windows, macOS and Linux.
+- On macOS, CPU is an approximation (summed process CPU ÷ cores) rather than a sampled total, and network counts only `en*` interfaces.
 - `ProxyJump` and `Include` in `~/.ssh/config` aren't supported. Hosts behind a jump host will show a connection error, though the terminal button still works.
 - In a Remote-SSH window, `~/.ssh/config` and "this machine" refer to the remote machine.
 
@@ -91,8 +92,8 @@ npm run typecheck
 Press **F5** to launch an Extension Development Host. To package and install locally:
 
 ```sh
-npx vsce package --no-dependencies -o heimdall-ssh-0.1.3.vsix
-code --install-extension heimdall-ssh-0.1.3.vsix --force
+npx vsce package --no-dependencies -o heimdall-ssh-0.1.4.vsix
+code --install-extension heimdall-ssh-0.1.4.vsix --force
 ```
 
 ## License

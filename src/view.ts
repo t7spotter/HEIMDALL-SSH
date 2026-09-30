@@ -24,8 +24,8 @@ export class ServersView implements vscode.WebviewViewProvider {
       keyPath: h.identityFile,
       sshAlias: h.alias,
     }));
-    // Stats come from /proc, so the local machine is only available on Linux.
-    const local = process.platform === 'linux' ? [localConfig()] : [];
+    // Stats come from shell tools available on Linux and macOS only.
+    const local = process.platform === 'linux' || process.platform === 'darwin' ? [localConfig()] : [];
     return [...local, ...fromSsh, ...manual];
   }
 

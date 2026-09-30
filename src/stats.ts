@@ -25,7 +25,7 @@ export interface Sample {
   ioSectors: number;
 }
 
-export const SCRIPT = [
+const LINUX = [
   'echo "##os"; (. /etc/os-release 2>/dev/null && echo "$PRETTY_NAME") || uname -sr',
   'echo "##up"; cut -d" " -f1 /proc/uptime',
   'echo "##load"; cut -d" " -f1-3 /proc/loadavg',
@@ -35,7 +35,25 @@ export const SCRIPT = [
   'echo "##df"; df -kP / | tail -1',
   'echo "##net"; cat /proc/net/dev',
   'echo "##io"; cat /proc/diskstats',
-].join('; ');
+];
+
+// macOS has no /proc, so the same sections are produced from sysctl, vm_stat, netstat and iostat.
+// Load, memory, disk, network and I/O match Activity Monitor closely; CPU is the summed %cpu of all
+// processes divided by core count, an approximation that avoids a one-second sampling delay.
+const DARWIN = [
+  'echo "##os"; echo "$(sw_vers -productName) $(sw_vers -productVersion)"',
+  'echo "##up"; b=$(sysctl -n kern.boottime | sed "s/^[^0-9]*\\([0-9]*\\).*/\\1/"); echo $(( $(date +%s) - b ))',
+  'echo "##load"; sysctl -n vm.loadavg | tr -d "{}" | awk \'{print $1, $2, $3}\'',
+  'echo "##cores"; sysctl -n hw.ncpu',
+  'echo "##cpu"; ps -A -o %cpu | awk -v n="$(sysctl -n hw.ncpu)" \'NR>1{s+=$1} END{printf "%.1f\\n", s/n}\'',
+  'echo "##memb"; echo "$(sysctl -n hw.memsize) $(vm_stat | awk \'/page size of/{ps=$8} /^Pages free/{f=$3} /^Pages inactive/{i=$3} /^Pages speculative/{s=$3} END{printf "%d", (f+i+s)*ps}\')"',
+  'echo "##df"; (df -kP /System/Volumes/Data 2>/dev/null || df -kP /) | tail -1',
+  'echo "##netsum"; netstat -ib | awk \'$3 ~ /^<Link#/ && $1 ~ /^en/ { if (NF>=11) {rx+=$7; rp+=$5; tx+=$10; tp+=$8} else {rx+=$6; rp+=$4; tx+=$9; tp+=$7} } END{print rx+0, rp+0, tx+0, tp+0}\'',
+  'echo "##iosum"; iostat -d -I 2>/dev/null | awk \'NR>2{for(i=1;i<=NF;i+=3){o+=$(i+1); m+=$(i+2)}} END{printf "%d %d\\n", o, m*1048576}\'',
+];
+
+/** POSIX sh script printing one "##section" per metric; run with `sh -c`, never in the login shell. */
+export const SCRIPT = `if [ "$(uname -s)" = Darwin ]; then ${DARWIN.join('; ')}; else ${LINUX.join('; ')}; fi`;
 
 const WHOLE_DISK = /^(sd[a-z]+|vd[a-z]+|xvd[a-z]+|hd[a-z]+|nvme\d+n\d+|mmcblk\d+)$/;
 
@@ -55,11 +73,17 @@ export function parse(out: string, prev: Sample | undefined, now: number): { sta
   const cpuFields = one('stat').split(/\s+/).slice(1, 9).map(Number);
   const cpuTotal = cpuFields.reduce((a, b) => a + b, 0);
   const cpuIdle = (cpuFields[3] || 0) + (cpuFields[4] || 0);
+  const directCpu = sections.cpu ? Number(one('cpu')) : undefined; // macOS reports a percentage directly
 
   const mem: Record<string, number> = {};
   for (const l of sections.mem ?? []) {
     const m = l.match(/^(\w+):\s+(\d+)/);
     if (m) mem[m[1]] = Number(m[2]) * 1024;
+  }
+  if (sections.memb) {
+    const [total, avail] = one('memb').split(/\s+/).map(Number);
+    mem.MemTotal = total || 0;
+    mem.MemAvailable = avail || 0;
   }
   const memTotal = mem.MemTotal || 0;
   const memPct = memTotal ? ((memTotal - (mem.MemAvailable ?? 0)) / memTotal) * 100 : 0;
@@ -78,6 +102,11 @@ export function parse(out: string, prev: Sample | undefined, now: number): { sta
     rx += f[0]; rxPk += f[1]; tx += f[8]; txPk += f[9];
   }
 
+  if (sections.netsum) {
+    const [r, rp, t, tp] = one('netsum').split(/\s+/).map(Number);
+    rx = r || 0; rxPk = rp || 0; tx = t || 0; txPk = tp || 0;
+  }
+
   let ioOps = 0, ioSectors = 0;
   for (const l of sections.io ?? []) {
     const f = l.trim().split(/\s+/);
@@ -86,14 +115,21 @@ export function parse(out: string, prev: Sample | undefined, now: number): { sta
     ioSectors += Number(f[5]) + Number(f[9]);
   }
 
+  if (sections.iosum) {
+    const [ops, bytes] = one('iosum').split(/\s+/).map(Number);
+    ioOps = ops || 0;
+    ioSectors = (bytes || 0) / 512;
+  }
+
   const sample: Sample = { t: now, cpuTotal, cpuIdle, rx, tx, rxPk, txPk, ioOps, ioSectors };
 
   let cpu = 0;
   let rates: Stats['rates'] = null;
+  if (directCpu !== undefined) cpu = directCpu;
   if (prev && now > prev.t) {
     const dt = (now - prev.t) / 1000;
     const dTotal = cpuTotal - prev.cpuTotal;
-    cpu = dTotal > 0 ? (1 - (cpuIdle - prev.cpuIdle) / dTotal) * 100 : 0;
+    if (directCpu === undefined) cpu = dTotal > 0 ? (1 - (cpuIdle - prev.cpuIdle) / dTotal) * 100 : 0;
     const r = (a: number, b: number) => Math.max(0, (a - b) / dt);
     rates = {
       rx: r(rx, prev.rx), tx: r(tx, prev.tx),

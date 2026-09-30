@@ -37,6 +37,9 @@ export const localConfig = (): ServerConfig => ({
   local: true,
 });
 
+/** Single-quote for POSIX sh, so the script runs in sh even if the login shell is fish/csh. */
+const shQuote = (s: string) => `'${s.replace(/'/g, `'\\''`)}'`;
+
 const expand = (p: string) => (p.startsWith('~') ? homedir() + p.slice(1) : p);
 
 export class Monitor {
@@ -177,7 +180,7 @@ export class Monitor {
     if (!this.client) return;
     this.busy = true;
     const started = Date.now();
-    this.client.exec(SCRIPT, (err, stream) => {
+    this.client.exec(`sh -c ${shQuote(SCRIPT)}`, (err, stream) => {
       if (err) return this.fail(gen, err.message);
       let out = '';
       stream.on('data', (d: Buffer) => (out += d.toString()));
