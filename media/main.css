@@ -53,3 +53,7 @@ button { cursor: pointer; font: inherit; color: inherit; }
   background: hsl(var(--h) 38% 45%); transition: transform .12s; }
 .swatches i:hover { transform: scale(1.2); }
 .swatches i.auto { background: rgba(0, 0, 0, .3); }
+
+#hidden { text-align: center; }
+#hidden button { background: none; border: 0; padding: 4px 8px; font-size: 11px; opacity: .6; border-radius: 6px; }
+#hidden button:hover { opacity: 1; background: var(--vscode-toolbar-hoverBackground); }

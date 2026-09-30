@@ -140,9 +140,15 @@
     }
   }
 
+  function hiddenBar(n) {
+    const el = document.getElementById('hidden');
+    el.innerHTML = n ? `<button>👁 ${n} hidden · Show…</button>` : '';
+    if (n) el.querySelector('button').onclick = () => vscode.postMessage({ type: 'unhide' });
+  }
+
   window.addEventListener('message', (e) => {
     const m = e.data;
-    if (m.type === 'servers') sync(m.servers);
+    if (m.type === 'servers') { sync(m.servers); hiddenBar(m.hiddenCount); }
     else if (m.type === 'update') update(m);
   });
   vscode.postMessage({ type: 'ready' });

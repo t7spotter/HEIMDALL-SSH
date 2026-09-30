@@ -38,9 +38,28 @@ export class ServersView implements vscode.WebviewViewProvider {
     return this.ctx.globalState.get<string[]>('heimdall.autoHidden', []);
   }
 
+  private hiddenAliases(): string[] {
+    const manual = vscode.workspace.getConfiguration('heimdall').get<string[]>('hiddenHosts', []);
+    return [...new Set([...manual, ...this.autoHidden()])];
+  }
+
+  /** Let the user pick which hidden hosts to bring back. */
   async showHidden() {
-    await this.ctx.globalState.update('heimdall.autoHidden', []);
-    await vscode.workspace.getConfiguration('heimdall').update('hiddenHosts', [], vscode.ConfigurationTarget.Global);
+    const hidden = this.hiddenAliases();
+    if (!hidden.length) {
+      vscode.window.showInformationMessage('Heimdall-SSH: no hidden hosts.');
+      return;
+    }
+    const ALL = 'Show all';
+    const picks = await vscode.window.showQuickPick(
+      [{ label: ALL, description: `${hidden.length} hidden` }, ...hidden.map((label) => ({ label }))],
+      { canPickMany: true, title: 'Show hidden hosts', placeHolder: 'Select hosts to bring back' },
+    );
+    if (!picks?.length) return;
+    const restore = new Set(picks.some((p) => p.label === ALL) ? hidden : picks.map((p) => p.label));
+    await this.ctx.globalState.update('heimdall.autoHidden', this.autoHidden().filter((a) => !restore.has(a)));
+    const cfg = vscode.workspace.getConfiguration('heimdall');
+    await cfg.update('hiddenHosts', cfg.get<string[]>('hiddenHosts', []).filter((a) => !restore.has(a)), vscode.ConfigurationTarget.Global);
     this.syncMonitors();
   }
 
@@ -52,7 +71,10 @@ export class ServersView implements vscode.WebviewViewProvider {
       `Heimdall-SSH hid "${cfg.name}": it accepts SSH but has no shell, so it isn't a server.`,
       'Undo',
     );
-    if (pick === 'Undo') await this.showHidden();
+    if (pick === 'Undo') {
+      await this.ctx.globalState.update('heimdall.autoHidden', this.autoHidden().filter((a) => a !== cfg.sshAlias));
+      this.syncMonitors();
+    }
   }
 
   private get active() {
@@ -68,11 +90,12 @@ export class ServersView implements vscode.WebviewViewProvider {
     view.webview.html = `<!doctype html><html><head><meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${view.webview.cspSource}; script-src 'nonce-${nonce}';">
 <link rel="stylesheet" href="${uri('main.css')}"></head>
-<body><div id="root"></div><script nonce="${nonce}" src="${uri('main.js')}"></script></body></html>`;
+<body><div id="root"></div><div id="hidden"></div><script nonce="${nonce}" src="${uri('main.js')}"></script></body></html>`;
 
     view.webview.onDidReceiveMessage((m) => {
       if (m.type === 'ready') this.syncMonitors();
       else if (m.type === 'color') this.setColor(m.id, m.hue);
+      else if (m.type === 'unhide') this.showHidden();
       else if (m.type === 'openConfig') vscode.commands.executeCommand('heimdall.openSshConfig');
       else if (m.type === 'add') vscode.commands.executeCommand('heimdall.addServer');
       else if (m.type === 'terminal') this.openTerminal(m.id);
@@ -127,6 +150,7 @@ export class ServersView implements vscode.WebviewViewProvider {
     const colors = this.ctx.globalState.get<Record<string, number>>('heimdall.colors', {});
     this.view?.webview.postMessage({
       type: 'servers',
+      hiddenCount: this.hiddenAliases().length,
       servers: this.servers().map(({ id, name, sshAlias }) => ({ id, name, removable: id !== 'local', hue: colors[id] ?? null })),
     });
     for (const [id, snap] of this.latest) this.view?.webview.postMessage({ type: 'update', id, ...snap });

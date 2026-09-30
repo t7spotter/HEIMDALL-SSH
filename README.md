@@ -36,7 +36,7 @@ Or use **Extensions → ⋯ → Install from VSIX…**. To update later, click t
 ## Getting started
 
 1. Install the extension and click the **Heimdall-SSH** icon in the activity bar.
-2. Hosts from `~/.ssh/config` appear automatically. Entries that only exist for git (`github.com`, `gitlab.com`, hosts with `User git`, ...) are skipped, and any other host that accepts your key but refuses to run a shell is detected on first connect and hidden automatically, with an **Undo** button. Click ✕ on a card to hide a host yourself; your config file is never modified. Edits to that file are picked up within a couple of seconds.
+2. Hosts from `~/.ssh/config` appear automatically. Entries that only exist for git (`github.com`, `gitlab.com`, hosts with `User git`, ...) are skipped, and any other host that accepts your key but refuses to run a shell is detected on first connect and hidden automatically, with an **Undo** button. Click ✕ on a card to hide a host yourself; your config file is never modified. When anything is hidden, a **👁 N hidden · Show…** button appears under the cards to pick which hosts to bring back. Edits to that file are picked up within a couple of seconds.
 3. To add a server that isn't in your config, click **+** in the panel title and answer the prompts.
 
 ### Authentication
@@ -70,7 +70,7 @@ Nothing is installed or left running on the server.
 
 - **Heimdall-SSH: Open ~/.ssh/config** (also the file icon in the panel title; creates a commented template if the file doesn't exist)
 - **Heimdall-SSH: Check for Updates** (download icon in the panel title)
-- **Heimdall-SSH: Show Hidden Hosts**
+- **Heimdall-SSH: Show Hidden Hosts** (pick which ones to restore)
 - **Heimdall-SSH: Add Server**
 - **Heimdall-SSH: Reconnect All**
 - **Heimdall-SSH: Forget Saved Host Keys**
@@ -93,8 +93,8 @@ npm run typecheck
 Press **F5** to launch an Extension Development Host. To package and install locally:
 
 ```sh
-npx vsce package --no-dependencies -o heimdall-ssh-0.1.5.vsix
-code --install-extension heimdall-ssh-0.1.5.vsix --force
+npx vsce package --no-dependencies -o heimdall-ssh-0.1.6.vsix
+code --install-extension heimdall-ssh-0.1.6.vsix --force
 ```
 
 ## License
