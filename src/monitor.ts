@@ -1,5 +1,7 @@
 import { Client, ConnectConfig, utils } from 'ssh2';
+import { execFile } from 'child_process';
 import { existsSync, readFileSync } from 'fs';
+import { hostname } from 'os';
 import { homedir } from 'os';
 import { Sample, SCRIPT, Stats, parse } from './stats';
 
@@ -13,6 +15,8 @@ export interface ServerConfig {
   keyPath?: string;
   /** Set for hosts discovered in ~/.ssh/config (not stored in settings). */
   sshAlias?: string;
+  /** Monitor this machine directly instead of connecting over SSH. */
+  local?: boolean;
 }
 
 export type Status = { state: 'connecting' | 'online' | 'error'; error?: string; latency?: number };
@@ -24,6 +28,14 @@ export interface MonitorDeps {
   intervalMs(): number;
   onUpdate(id: string, status: Status, stats?: Stats): void;
 }
+
+export const localConfig = (): ServerConfig => ({
+  id: 'local',
+  name: `${hostname()} (this machine)`,
+  host: 'localhost',
+  username: '',
+  local: true,
+});
 
 const expand = (p: string) => (p.startsWith('~') ? homedir() + p.slice(1) : p);
 
@@ -76,6 +88,10 @@ export class Monitor {
   private async connect() {
     const gen = ++this.gen;
     const { cfg } = this;
+    if (cfg.local) {
+      this.failures = 0;
+      return void this.poll(gen);
+    }
     this.deps.onUpdate(cfg.id, { state: 'connecting' });
 
     const port = cfg.port ?? 22;
@@ -138,8 +154,27 @@ export class Monitor {
       .connect(conn);
   }
 
+  private pollLocal(gen: number) {
+    this.busy = true;
+    execFile('sh', ['-c', SCRIPT], { timeout: 10_000 }, (err, out) => {
+      if (gen !== this.gen) return;
+      this.busy = false;
+      if (err) return this.fail(gen, err.message);
+      try {
+        const { stats, sample } = parse(out, this.prev, Date.now());
+        this.prev = sample;
+        this.deps.onUpdate(this.cfg.id, { state: 'online' }, stats);
+      } catch {
+        return this.fail(gen, 'Could not parse local stats');
+      }
+      this.timer = setTimeout(() => this.poll(gen), this.deps.intervalMs());
+    });
+  }
+
   private poll(gen: number) {
-    if (gen !== this.gen || !this.client || this.busy) return;
+    if (gen !== this.gen || this.busy) return;
+    if (this.cfg.local) return this.pollLocal(gen);
+    if (!this.client) return;
     this.busy = true;
     const started = Date.now();
     this.client.exec(SCRIPT, (err, stream) => {
