@@ -24,6 +24,7 @@
       { "command": "heimdall.openSshConfig", "title": "Heimdall-SSH: Open ~/.ssh/config", "icon": "$(go-to-file)" },
       { "command": "heimdall.checkForUpdate", "title": "Heimdall-SSH: Check for Updates", "icon": "$(cloud-download)" },
       { "command": "heimdall.refresh", "title": "Heimdall-SSH: Reconnect All", "icon": "$(refresh)" },
+      { "command": "heimdall.showHiddenHosts", "title": "Heimdall-SSH: Show Hidden Hosts" },
       { "command": "heimdall.forgetHostKeys", "title": "Heimdall-SSH: Forget Saved Host Keys" }
     ],
     "menus": {
@@ -42,6 +43,12 @@
           "default": 3,
           "minimum": 1,
           "description": "Seconds between stat updates."
+        },
+        "heimdall.hiddenHosts": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Host aliases from ~/.ssh/config to hide. Git hosts such as github.com and gitlab.com are always hidden."
         },
         "heimdall.servers": {
           "type": "array",

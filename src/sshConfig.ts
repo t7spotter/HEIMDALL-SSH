@@ -12,6 +12,13 @@ export interface SshHost {
   identityFile?: string;
 }
 
+const GIT_HOSTS = /(^|\.)(github\.com|gitlab\.com|bitbucket\.org|codeberg\.org|sr\.ht|dev\.azure\.com|visualstudio\.com)$/i;
+
+/** Entries that exist only so `git` can authenticate (GitHub, GitLab, ...); they aren't machines to monitor. */
+export function isGitHost(h: SshHost): boolean {
+  return GIT_HOSTS.test(h.alias) || GIT_HOSTS.test(h.hostName ?? '') || h.user === 'git';
+}
+
 /** Minimal ~/.ssh/config reader: concrete Host aliases and a few common keys. */
 export function readSshConfig(): SshHost[] {
   let text: string;

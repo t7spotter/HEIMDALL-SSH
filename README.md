@@ -36,7 +36,7 @@ Or use **Extensions → ⋯ → Install from VSIX…**. To update later, click t
 ## Getting started
 
 1. Install the extension and click the **Heimdall-SSH** icon in the activity bar.
-2. Hosts from `~/.ssh/config` appear automatically. Edits to that file are picked up within a couple of seconds.
+2. Hosts from `~/.ssh/config` appear automatically. Entries that are only for git (`github.com`, `gitlab.com`, `bitbucket.org`, hosts with `User git`) are skipped. Click ✕ on a card to hide any other host; your config file is never modified. Edits to that file are picked up within a couple of seconds.
 3. To add a server that isn't in your config, click **+** in the panel title and answer the prompts.
 
 ### Authentication
@@ -70,6 +70,7 @@ Nothing is installed or left running on the server.
 
 - **Heimdall-SSH: Open ~/.ssh/config** (also the file icon in the panel title; creates a commented template if the file doesn't exist)
 - **Heimdall-SSH: Check for Updates** (download icon in the panel title)
+- **Heimdall-SSH: Show Hidden Hosts**
 - **Heimdall-SSH: Add Server**
 - **Heimdall-SSH: Reconnect All**
 - **Heimdall-SSH: Forget Saved Host Keys**

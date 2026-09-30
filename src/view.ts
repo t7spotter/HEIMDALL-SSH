@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { Monitor, ServerConfig, Status, localConfig } from './monitor';
 import { Stats } from './stats';
-import { readSshConfig } from './sshConfig';
+import { isGitHost, readSshConfig } from './sshConfig';
 
 type Snapshot = { status: Status; stats?: Stats };
 
@@ -14,7 +14,8 @@ export class ServersView implements vscode.WebviewViewProvider {
 
   private servers(): ServerConfig[] {
     const manual = vscode.workspace.getConfiguration('heimdall').get<ServerConfig[]>('servers', []);
-    const fromSsh = readSshConfig().map<ServerConfig>((h) => ({
+    const hidden = new Set(vscode.workspace.getConfiguration('heimdall').get<string[]>('hiddenHosts', []));
+    const fromSsh = readSshConfig().filter((h) => !isGitHost(h) && !hidden.has(h.alias)).map<ServerConfig>((h) => ({
       id: `ssh:${h.alias}`,
       name: h.alias,
       host: h.hostName ?? h.alias,
@@ -100,7 +101,7 @@ export class ServersView implements vscode.WebviewViewProvider {
     const colors = this.ctx.globalState.get<Record<string, number>>('heimdall.colors', {});
     this.view?.webview.postMessage({
       type: 'servers',
-      servers: this.servers().map(({ id, name, sshAlias }) => ({ id, name, removable: !sshAlias && id !== 'local', hue: colors[id] ?? null })),
+      servers: this.servers().map(({ id, name, sshAlias }) => ({ id, name, removable: id !== 'local', hue: colors[id] ?? null })),
     });
     for (const [id, snap] of this.latest) this.view?.webview.postMessage({ type: 'update', id, ...snap });
   }
@@ -133,10 +134,18 @@ export class ServersView implements vscode.WebviewViewProvider {
 
   private async remove(id: string) {
     const c = this.servers().find((s) => s.id === id);
-    if (!c || c.sshAlias || c.local) return;
+    if (!c || c.local) return;
+    const cfg = vscode.workspace.getConfiguration('heimdall');
+    if (c.sshAlias) {
+      // Hosts from ~/.ssh/config are hidden, never deleted from the file.
+      const ok = await vscode.window.showWarningMessage(`Hide "${c.name}"? Your ~/.ssh/config is not changed.`, { modal: true }, 'Hide');
+      if (ok !== 'Hide') return;
+      const hidden = cfg.get<string[]>('hiddenHosts', []);
+      await cfg.update('hiddenHosts', [...new Set([...hidden, c.sshAlias])], vscode.ConfigurationTarget.Global);
+      return;
+    }
     const ok = await vscode.window.showWarningMessage(`Remove "${c.name}"?`, { modal: true }, 'Remove');
     if (ok !== 'Remove') return;
-    const cfg = vscode.workspace.getConfiguration('heimdall');
     await cfg.update('servers', this.servers().filter((s) => s.id !== id), vscode.ConfigurationTarget.Global);
     await this.ctx.secrets.delete(`heimdall.pw.${id}`);
   }

@@ -34,7 +34,7 @@
       <div class="bar"></div>
       <div class="head"><span class="dot"></span>
         <div class="title"><div class="name">${esc(s.name)}</div><div class="meta">connecting…</div></div>
-        <div class="icons"><button data-a="palette" title="Card colour">🎨</button><button data-a="terminal" title="Open terminal">&gt;_</button>${s.removable ? '<button data-a="remove" title="Remove">✕</button>' : ''}</div>
+        <div class="icons"><button data-a="palette" title="Card colour">🎨</button><button data-a="terminal" title="Open terminal">&gt;_</button>${s.removable ? '<button data-a="remove" title="Remove / hide">✕</button>' : ''}</div>
       </div><div class="swatches" hidden>${SWATCHES.map((h) => `<i data-hue="${h}" title="hue ${h}"></i>`).join('')}<i class="auto" data-hue="" title="Automatic">A</i></div>
       <div class="err" hidden></div>
       <div class="body"><div class="panel">

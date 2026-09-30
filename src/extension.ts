@@ -13,6 +13,9 @@ export function activate(ctx: vscode.ExtensionContext) {
   ctx.subscriptions.push(
     vscode.window.registerWebviewViewProvider('heimdall.servers', view, { webviewOptions: { retainContextWhenHidden: true } }),
     vscode.workspace.onDidChangeConfiguration((e) => e.affectsConfiguration('heimdall') && view.syncMonitors()),
+    vscode.commands.registerCommand('heimdall.showHiddenHosts', async () => {
+      await vscode.workspace.getConfiguration('heimdall').update('hiddenHosts', [], vscode.ConfigurationTarget.Global);
+    }),
     vscode.commands.registerCommand('heimdall.refresh', () => view.reconnectAll()),
     vscode.commands.registerCommand('heimdall.forgetHostKeys', async () => {
       await ctx.globalState.update('heimdall.hostKeys', {});
