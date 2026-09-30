@@ -18,7 +18,7 @@
     el.innerHTML = `
       <div class="head"><span class="dot"></span>
         <div class="title"><div class="name">${esc(s.name)}</div><div class="meta">connecting…</div></div>
-        <div class="icons"><button data-a="terminal" title="Open SSH terminal">&gt;_</button><button data-a="remove" title="Remove">✕</button></div>
+        <div class="icons"><button data-a="terminal" title="Open SSH terminal">&gt;_</button>${s.removable ? '<button data-a="remove" title="Remove">✕</button>' : ''}</div>
       </div><div class="err" hidden></div>
       <div class="body">
         <div class="gauges">${gaugeHtml('cpu', 'CPU')}${gaugeHtml('mem', 'Mem')}${gaugeHtml('load', 'Load')}${gaugeHtml('disk', 'Disk')}</div>
@@ -47,7 +47,7 @@
     if (!servers.length) {
       const d = document.createElement('div');
       d.className = 'empty';
-      d.innerHTML = 'No servers yet.<br><button class="add">Add server</button>';
+      d.innerHTML = 'No servers found in ~/.ssh/config.<br><button class="add">Add server</button>';
       d.querySelector('button').onclick = () => vscode.postMessage({ type: 'add' });
       root.appendChild(d);
     }

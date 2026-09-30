@@ -2,6 +2,8 @@ import { readFileSync } from 'fs';
 import { homedir } from 'os';
 import { join } from 'path';
 
+export const SSH_CONFIG_PATH = join(homedir(), '.ssh', 'config');
+
 export interface SshHost {
   alias: string;
   hostName?: string;
@@ -14,7 +16,7 @@ export interface SshHost {
 export function readSshConfig(): SshHost[] {
   let text: string;
   try {
-    text = readFileSync(join(homedir(), '.ssh', 'config'), 'utf8');
+    text = readFileSync(SSH_CONFIG_PATH, 'utf8');
   } catch {
     return [];
   }

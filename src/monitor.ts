@@ -1,5 +1,5 @@
-import { Client, ConnectConfig } from 'ssh2';
-import { readFileSync } from 'fs';
+import { Client, ConnectConfig, utils } from 'ssh2';
+import { existsSync, readFileSync } from 'fs';
 import { homedir } from 'os';
 import { Sample, SCRIPT, Stats, parse } from './stats';
 
@@ -9,8 +9,10 @@ export interface ServerConfig {
   host: string;
   port?: number;
   username: string;
-  auth?: 'agent' | 'key' | 'password';
+  auth?: 'auto' | 'agent' | 'key' | 'password';
   keyPath?: string;
+  /** Set for hosts discovered in ~/.ssh/config (not stored in settings). */
+  sshAlias?: string;
 }
 
 export type Status = { state: 'connecting' | 'online' | 'error'; error?: string; latency?: number };
@@ -97,6 +99,16 @@ export class Monitor {
       if (auth === 'password') {
         conn.password = await this.deps.getPassword(cfg.id);
         if (!conn.password) throw new Error('No saved password');
+      } else if (auth === 'auto') {
+        // Mirror what `ssh` does without a config entry: agent plus default key files.
+        conn.agent = process.env.SSH_AUTH_SOCK;
+        for (const f of ['id_ed25519', 'id_ecdsa', 'id_rsa']) {
+          const p = expand(`~/.ssh/${f}`);
+          if (!existsSync(p)) continue;
+          const buf = readFileSync(p);
+          if (!(utils.parseKey(buf) instanceof Error)) { conn.privateKey = buf; break; } // skips passphrase-protected keys
+        }
+        if (!conn.agent && !conn.privateKey) throw new Error('No ssh-agent or unencrypted default key found');
       } else if (auth === 'key') {
         conn.privateKey = readFileSync(expand(cfg.keyPath ?? '~/.ssh/id_ed25519'));
       } else {

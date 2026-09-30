@@ -39,7 +39,7 @@
         "yomo.servers": {
           "type": "array",
           "default": [],
-          "description": "Servers to monitor. Passwords are kept in VS Code's secret storage, never here.",
+          "description": "Extra servers to monitor (hosts in ~/.ssh/config are picked up automatically). Passwords are kept in VS Code's secret storage, never here.",
           "items": {
             "type": "object",
             "required": ["id", "name", "host", "username"],
@@ -49,7 +49,7 @@
               "host": { "type": "string" },
               "port": { "type": "number", "default": 22 },
               "username": { "type": "string" },
-              "auth": { "enum": ["agent", "key", "password"], "default": "agent" },
+              "auth": { "enum": ["auto", "agent", "key", "password"], "default": "auto" },
               "keyPath": { "type": "string", "description": "Private key file (auth = key)." }
             }
           }
