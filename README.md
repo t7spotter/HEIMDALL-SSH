@@ -1,4 +1,4 @@
-# Heimdall
+# Heimdall-SSH
 
 Live stats for your SSH servers, right in the VS Code sidebar. Minimal, handy, no agent to install on the server.
 
@@ -14,7 +14,7 @@ The machine VS Code is running on is shown too, as the first card.
 
 ## Getting started
 
-1. Install the extension and click the **Heimdall** icon in the activity bar.
+1. Install the extension and click the **Heimdall-SSH** icon in the activity bar.
 2. Hosts from `~/.ssh/config` appear automatically. Edits to that file are picked up within a couple of seconds.
 3. To add a server that isn't in your config, click **+** in the panel title and answer the prompts.
 
@@ -30,7 +30,7 @@ Passwords are stored in VS Code's secret storage, never in settings. Passphrase-
 
 ### Host keys
 
-The first time Heimdall connects to a server it remembers the host key. If the key later changes, the connection is refused. Run **Heimdall: Forget Saved Host Keys** if the change is expected.
+The first time Heimdall connects to a server it remembers the host key. If the key later changes, the connection is refused. Run **Heimdall-SSH: Forget Saved Host Keys** if the change is expected.
 
 ## How it works
 
@@ -47,9 +47,9 @@ Nothing is installed or left running on the server.
 
 ## Commands
 
-- **Heimdall: Add Server**
-- **Heimdall: Reconnect All**
-- **Heimdall: Forget Saved Host Keys**
+- **Heimdall-SSH: Add Server**
+- **Heimdall-SSH: Reconnect All**
+- **Heimdall-SSH: Forget Saved Host Keys**
 
 ## Limitations
 
@@ -68,8 +68,8 @@ npm run typecheck
 Press **F5** to launch an Extension Development Host. To package and install locally:
 
 ```sh
-npx vsce package --allow-missing-repository --skip-license --no-dependencies -o heimdall-0.1.0.vsix
-code --install-extension heimdall-0.1.0.vsix --force
+npx vsce package --allow-missing-repository --skip-license --no-dependencies -o heimdall-ssh-0.1.0.vsix
+code --install-extension heimdall-ssh-0.1.0.vsix --force
 ```
 
 ## License

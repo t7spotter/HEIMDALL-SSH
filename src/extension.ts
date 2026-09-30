@@ -14,7 +14,7 @@ export function activate(ctx: vscode.ExtensionContext) {
     vscode.commands.registerCommand('heimdall.refresh', () => view.reconnectAll()),
     vscode.commands.registerCommand('heimdall.forgetHostKeys', async () => {
       await ctx.globalState.update('heimdall.hostKeys', {});
-      vscode.window.showInformationMessage('Heimdall: saved host keys cleared.');
+      vscode.window.showInformationMessage('Heimdall-SSH: saved host keys cleared.');
       view.reconnectAll();
     }),
     vscode.commands.registerCommand('heimdall.addServer', () => addServer(ctx)),

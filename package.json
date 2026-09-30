@@ -1,6 +1,6 @@
 {
-  "name": "heimdall",
-  "displayName": "Heimdall – SSH Server Stats",
+  "name": "heimdall-ssh",
+  "displayName": "Heimdall-SSH",
   "description": "Minimal live CPU, memory, load, disk and network stats for your SSH servers, right in the sidebar.",
   "version": "0.1.0",
   "publisher": "heimdall",
@@ -11,15 +11,15 @@
   "activationEvents": [],
   "contributes": {
     "viewsContainers": {
-      "activitybar": [{ "id": "heimdall", "title": "Heimdall", "icon": "media/icon.svg" }]
+      "activitybar": [{ "id": "heimdall", "title": "Heimdall-SSH", "icon": "media/icon.svg" }]
     },
     "views": {
       "heimdall": [{ "type": "webview", "id": "heimdall.servers", "name": "Servers" }]
     },
     "commands": [
-      { "command": "heimdall.addServer", "title": "Heimdall: Add Server", "icon": "$(add)" },
-      { "command": "heimdall.refresh", "title": "Heimdall: Reconnect All", "icon": "$(refresh)" },
-      { "command": "heimdall.forgetHostKeys", "title": "Heimdall: Forget Saved Host Keys" }
+      { "command": "heimdall.addServer", "title": "Heimdall-SSH: Add Server", "icon": "$(add)" },
+      { "command": "heimdall.refresh", "title": "Heimdall-SSH: Reconnect All", "icon": "$(refresh)" },
+      { "command": "heimdall.forgetHostKeys", "title": "Heimdall-SSH: Forget Saved Host Keys" }
     ],
     "menus": {
       "view/title": [
@@ -28,7 +28,7 @@
       ]
     },
     "configuration": {
-      "title": "Heimdall",
+      "title": "Heimdall-SSH",
       "properties": {
         "heimdall.refreshInterval": {
           "type": "number",
