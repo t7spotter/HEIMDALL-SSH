@@ -13,6 +13,10 @@ Each server gets a card with:
 
 The machine VS Code is running on is shown too, as the first card.
 
+<p align="center">
+  <img src="docs/screenshots/overview.png" alt="Heimdall-SSH server cards in the VS Code sidebar" width="320">
+</p>
+
 ## Install
 
 Download `heimdall-ssh-x.y.z.vsix` from the [latest release](https://github.com/t7spotter/HEIMDALL-SSH/releases/latest) and run:
@@ -22,6 +26,12 @@ code --install-extension heimdall-ssh-x.y.z.vsix
 ```
 
 Or use **Extensions → ⋯ → Install from VSIX…**. To update later, click the download icon in the panel title (or run **Heimdall-SSH: Check for Updates**). If a newer release exists it is downloaded and installed, and a **Reload Window** button appears.
+
+### Screenshots
+
+| Connection states | Pick a colour per machine |
+| --- | --- |
+| <img src="docs/screenshots/states.png" alt="Online, connecting and offline cards" width="300"> | <img src="docs/screenshots/colors.png" alt="Colour picker on a server card" width="300"> |
 
 ## Getting started
 

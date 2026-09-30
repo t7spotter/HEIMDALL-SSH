@@ -1,0 +1,40 @@
+<!doctype html>
+<!-- Renders the real webview UI with sample data, used to generate the README screenshots.
+     Open with ?scene=overview|states|colors -->
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../media/main.css">
+<style>
+  :root { --vscode-button-background: #0e639c; --vscode-button-foreground: #fff; }
+  body { background: #181818; color: #ccc; font: 13px system-ui, sans-serif; width: 300px; padding: 12px 10px; margin: 0; }
+</style></head>
+<body><div id="root"></div>
+<script>window.acquireVsCodeApi = () => ({ postMessage() {} });</script>
+<script src="../media/main.js"></script>
+<script>
+const stats = (cpu, mem, load, disk, os, rates) => ({
+  os, uptime: 700000, cores: 4, cpu, memPct: mem, memTotal: 15.6e9, load: [load, load, load],
+  diskPct: disk, diskTotal: 154e9, rates,
+});
+const OS = 'Ubuntu 24.04.4 LTS';
+const scene = new URLSearchParams(location.search).get('scene') || 'overview';
+const send = (m) => postMessage(m, '*');
+
+if (scene === 'overview') {
+  send({ type: 'servers', servers: [
+    { id: 'a', name: 'web-01', removable: true }, { id: 'b', name: 'db-prod', removable: true, hue: 345 },
+    { id: 'c', name: 'laptop (this machine)', hue: 260 } ] });
+  send({ type: 'update', id: 'a', status: { state: 'online', latency: 42 }, stats: stats(6, 41, .43, 51, OS, { rx: 183130, tx: 3393, rxPk: 383, txPk: 19, ioBps: 196586, iops: 42 }) });
+  send({ type: 'update', id: 'b', status: { state: 'online', latency: 118 }, stats: stats(78, 87, 3.4, 72, 'Debian GNU/Linux 12', { rx: 4.2e6, tx: 1.1e6, rxPk: 3100, txPk: 1450, ioBps: 38e6, iops: 910 }) });
+  send({ type: 'update', id: 'c', status: { state: 'online' }, stats: stats(14, 35, .9, 37, OS, { rx: 28e3, tx: 5600, rxPk: 61, txPk: 22, ioBps: 72e3, iops: 8 }) });
+} else if (scene === 'states') {
+  send({ type: 'servers', servers: [
+    { id: 'a', name: 'staging', removable: true }, { id: 'b', name: 'backup-nas', removable: true }, { id: 'c', name: 'old-vps', removable: true } ] });
+  send({ type: 'update', id: 'a', status: { state: 'online', latency: 77 }, stats: stats(3, 28, .12, 44, OS, { rx: 900, tx: 400, rxPk: 6, txPk: 4, ioBps: 0, iops: 0 }) });
+  send({ type: 'update', id: 'b', status: { state: 'connecting' } });
+  send({ type: 'update', id: 'c', status: { state: 'error', error: 'Connection timed out' } });
+} else {
+  send({ type: 'servers', servers: [{ id: 'a', name: 'web-01', removable: true, hue: 150 }] });
+  send({ type: 'update', id: 'a', status: { state: 'online', latency: 42 }, stats: stats(6, 41, .43, 51, OS, { rx: 183130, tx: 3393, rxPk: 383, txPk: 19, ioBps: 196586, iops: 42 }) });
+  setTimeout(() => document.querySelector('[data-a=palette]').click(), 100);
+}
+</script></body></html>
