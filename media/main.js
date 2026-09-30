@@ -4,28 +4,38 @@
   const cards = new Map();
 
   const ARC = 'M21.72 78.28 A40 40 0 1 1 78.28 78.28';
-  const gaugeHtml = (key, label) =>
-    `<div class="gauge" data-k="${key}"><div class="lbl">${label}</div>
-     <svg viewBox="0 0 100 100"><path class="track" d="${ARC}" pathLength="100"/>
-     <path class="fill" d="${ARC}" pathLength="100" stroke-dasharray="0 100"/>
+  let gid = 0;
+  const gaugeHtml = (key, label) => {
+    const id = 'g' + gid++;
+    return `<div class="gauge" data-k="${key}"><div class="lbl">${label}</div>
+     <svg viewBox="0 0 100 100"><defs><linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="18" y1="0" x2="82" y2="0">
+       <stop offset="0" stop-color="#2be38a"/><stop offset=".5" stop-color="#f2d43b"/><stop offset="1" stop-color="#ff4d5e"/></linearGradient></defs>
+     <path class="track" d="${ARC}" pathLength="100"/>
+     <path class="fill" d="${ARC}" pathLength="100" stroke="url(#${id})" stroke-dasharray="0 100"/>
+     <circle class="knob" r="3.4" cx="21.72" cy="78.28"/>
      <text x="50" y="58">–</text></svg><div class="sub">&nbsp;</div></div>`;
+  };
 
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
   function makeCard(s) {
     const el = document.createElement('div');
     el.className = 'card offline';
+    let h = 0;
+    for (const c of s.name) h = (h * 31 + c.charCodeAt(0)) % 360;
+    el.style.setProperty('--h', h);
     el.innerHTML = `
+      <div class="bar"></div>
       <div class="head"><span class="dot"></span>
         <div class="title"><div class="name">${esc(s.name)}</div><div class="meta">connecting…</div></div>
         <div class="icons"><button data-a="terminal" title="Open terminal">&gt;_</button>${s.removable ? '<button data-a="remove" title="Remove">✕</button>' : ''}</div>
       </div><div class="err" hidden></div>
-      <div class="body">
-        <div class="gauges">${gaugeHtml('cpu', 'CPU')}${gaugeHtml('mem', 'Mem')}${gaugeHtml('load', 'Load')}${gaugeHtml('disk', 'Disk')}</div>
+      <div class="body"><div class="panel">
+        <div class="gauges">${gaugeHtml('cpu', 'CPU')}${gaugeHtml('mem', 'Mem')}${gaugeHtml('load', 'Load')}${gaugeHtml('disk', 'Disk')}</div></div>
         <div class="foot">
-          <div data-f="rx"><b>–</b><span>↓ –</span></div>
-          <div data-f="tx"><b>–</b><span>↑ –</span></div>
-          <div data-f="io"><b>–</b><span>disk –</span></div>
+          <div class="rx" data-f="rx"><b>–</b><span>↓ –</span></div>
+          <div class="tx" data-f="tx"><b>–</b><span>↑ –</span></div>
+          <div class="io" data-f="io"><b>–</b><span>disk –</span></div>
         </div></div>`;
     el.addEventListener('click', (e) => {
       const a = e.target.closest('button')?.dataset.a;
@@ -53,13 +63,14 @@
     }
   }
 
-  const color = (p) => (p < 60 ? 'var(--ok)' : p < 85 ? 'var(--warn)' : 'var(--bad)');
   function setGauge(el, key, pct, text, sub) {
     const g = el.querySelector(`[data-k="${key}"]`);
     const p = Math.max(0, Math.min(100, pct));
-    const fill = g.querySelector('.fill');
-    fill.setAttribute('stroke-dasharray', `${p} 100`);
-    fill.style.stroke = color(p);
+    g.querySelector('.fill').setAttribute('stroke-dasharray', `${p} 100`);
+    const a = ((135 + 2.7 * p) * Math.PI) / 180; // arc runs 135° → 405°
+    const knob = g.querySelector('.knob');
+    knob.setAttribute('cx', (50 + 40 * Math.cos(a)).toFixed(2));
+    knob.setAttribute('cy', (50 + 40 * Math.sin(a)).toFixed(2));
     g.querySelector('text').textContent = text;
     g.querySelector('.sub').textContent = sub;
   }

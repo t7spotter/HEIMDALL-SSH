@@ -1,36 +1,55 @@
-:root { --ok: #4caf50; --warn: #e6b422; --bad: #e5534b; }
-body { padding: 8px; margin: 0; }
-.empty { text-align: center; opacity: .75; padding: 24px 8px; }
+body { padding: 10px 8px; margin: 0; }
+.empty { text-align: center; opacity: .8; padding: 24px 8px; line-height: 2; }
 button { cursor: pointer; font: inherit; color: inherit; }
-.add { margin-top: 10px; padding: 6px 12px; border: 0; border-radius: 4px;
+.add { margin: 2px; padding: 6px 12px; border: 0; border-radius: 6px;
   background: var(--vscode-button-background); color: var(--vscode-button-foreground); }
 
-.card { background: var(--vscode-sideBar-background, transparent); border: 1px solid var(--vscode-widget-border, rgba(128,128,128,.3));
-  border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
-.card.offline .body { opacity: .4; }
-.head { display: flex; align-items: flex-start; gap: 6px; padding: 8px 10px 4px; }
-.dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex: none; background: var(--warn); }
-.online .dot { background: var(--ok); } .error .dot { background: var(--bad); }
-.title { flex: 1; min-width: 0; }
-.name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.meta { font-size: 11px; opacity: .7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.err { font-size: 11px; color: var(--bad); padding: 0 10px 4px 24px; }
-.icons { display: flex; gap: 2px; }
-.icons button { background: none; border: 0; padding: 2px 5px; border-radius: 4px; opacity: .65; font-size: 13px; }
-.icons button:hover { opacity: 1; background: var(--vscode-toolbar-hoverBackground); }
+/* Each card gets its own hue (--h) from its name, like the colourful cards in the mobile app. */
+.card {
+  --h: 210;
+  position: relative; margin-bottom: 12px; border-radius: 14px; overflow: hidden; color: #fff;
+  background: linear-gradient(145deg, hsl(var(--h) 62% 38%), hsl(calc(var(--h) + 35) 58% 24%));
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(255, 255, 255, .08);
+  transition: filter .4s, box-shadow .4s;
+}
+.card.offline { filter: saturate(.55) brightness(.85); }
 
-.gauges { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 0; padding: 4px 6px; }
+/* Status strip: gradient by state, shimmering while connecting. */
+.bar { height: 3px; background: linear-gradient(90deg, #f5b301, #ff8a00); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
+.online .bar { background: linear-gradient(90deg, #22d3a0, #7be04f, #d8e64a); animation: none; }
+.error .bar { background: linear-gradient(90deg, #ff5f6d, #ff2d55); animation: none; }
+.online { box-shadow: 0 4px 16px rgba(0, 0, 0, .35), 0 0 0 1px rgba(123, 224, 79, .25), 0 0 18px -6px rgba(34, 211, 160, .6); }
+.error { box-shadow: 0 4px 16px rgba(0, 0, 0, .35), 0 0 0 1px rgba(255, 95, 109, .35), 0 0 18px -6px rgba(255, 45, 85, .6); }
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: 0 0; } }
+
+.head { display: flex; align-items: flex-start; gap: 8px; padding: 10px 10px 8px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; margin-top: 5px; flex: none;
+  background: radial-gradient(circle at 35% 35%, #ffd76a, #f5a000); box-shadow: 0 0 8px #f5a000; animation: pulse 1.2s ease-in-out infinite; }
+.online .dot { background: radial-gradient(circle at 35% 35%, #b8ffd9, #1fd38a); box-shadow: 0 0 8px #1fd38a; animation: none; }
+.error .dot { background: radial-gradient(circle at 35% 35%, #ffb3ba, #ff3b4e); box-shadow: 0 0 8px #ff3b4e; animation: none; }
+@keyframes pulse { 50% { opacity: .35; } }
+.title { flex: 1; min-width: 0; }
+.name { font-weight: 700; font-size: 13px; letter-spacing: .2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 2px rgba(0, 0, 0, .3); }
+.meta { font-size: 11px; opacity: .75; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.err { font-size: 11px; padding: 0 10px 8px 27px; color: #ffd0d4; }
+.icons { display: flex; gap: 4px; }
+.icons button { background: rgba(0, 0, 0, .28); border: 0; padding: 3px 7px; border-radius: 7px; font-size: 12px; opacity: .85; transition: background .15s, opacity .15s; }
+.icons button:hover { opacity: 1; background: rgba(255, 255, 255, .22); }
+
+.panel { background: rgba(0, 0, 0, .3); backdrop-filter: blur(6px); border-radius: 14px 14px 0 0; padding: 8px 4px 4px; }
+.gauges { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px 0; }
 @media (min-width: 300px) { .gauges { grid-template-columns: repeat(4, 1fr); } }
 .gauge { text-align: center; min-width: 0; }
-.gauge .lbl { font-size: 11px; opacity: .8; }
-.gauge .sub { font-size: 10px; opacity: .6; margin-top: -4px; }
-.gauge svg { width: 100%; max-width: 72px; display: block; margin: 0 auto; }
-.gauge .track { stroke: var(--vscode-editor-foreground); opacity: .12; fill: none; stroke-width: 9; stroke-linecap: round; }
-.gauge .fill { fill: none; stroke-width: 9; stroke-linecap: round; transition: stroke-dasharray .4s, stroke .4s; }
-.gauge text { fill: var(--vscode-foreground); font-size: 20px; font-weight: 600; text-anchor: middle; }
+.gauge .lbl { font-size: 11px; font-weight: 600; opacity: .9; }
+.gauge .sub { font-size: 10px; opacity: .65; margin-top: -6px; }
+.gauge svg { width: 100%; max-width: 76px; display: block; margin: 0 auto; overflow: visible; }
+.gauge .track { stroke: rgba(255, 255, 255, .16); fill: none; stroke-width: 9; stroke-linecap: round; }
+.gauge .fill { fill: none; stroke-width: 9; stroke-linecap: round; transition: stroke-dasharray .6s cubic-bezier(.3, .8, .3, 1); filter: drop-shadow(0 0 3px rgba(255, 255, 255, .25)); }
+.gauge .knob { fill: #fff; stroke: rgba(0, 0, 0, .35); stroke-width: 1.5; transition: cx .6s cubic-bezier(.3, .8, .3, 1), cy .6s cubic-bezier(.3, .8, .3, 1); }
+.gauge text { fill: #fff; font-size: 20px; font-weight: 700; text-anchor: middle; }
 
-.foot { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 6px 10px 8px; font-size: 10.5px;
-  border-top: 1px solid var(--vscode-widget-border, rgba(128,128,128,.2)); background: rgba(128,128,128,.06); }
+.foot { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 8px 10px 10px; font-size: 10.5px; background: rgba(0, 0, 0, .3); border-top: 1px solid rgba(255, 255, 255, .08); }
 .foot div { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.foot b { font-weight: 600; display: block; font-size: 11px; }
+.foot b { display: block; font-size: 11.5px; font-weight: 700; }
 .foot span { opacity: .65; }
+.foot .rx b { color: #7ee8c4; } .foot .tx b { color: #ffc86b; } .foot .io b { color: #a9b8ff; }
