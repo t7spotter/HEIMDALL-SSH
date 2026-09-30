@@ -12,6 +12,16 @@ Each server gets a card with:
 
 The machine VS Code is running on is shown too, as the first card.
 
+## Install
+
+Download `heimdall-ssh-x.y.z.vsix` from the [latest release](https://github.com/t7spotter/HEIMDALL-SSH/releases/latest) and run:
+
+```sh
+code --install-extension heimdall-ssh-x.y.z.vsix
+```
+
+Or use **Extensions → ⋯ → Install from VSIX…**. To update later, click the download icon in the panel title (or run **Heimdall-SSH: Check for Updates**). If a newer release exists it is downloaded and installed, and a **Reload Window** button appears.
+
 ## Getting started
 
 1. Install the extension and click the **Heimdall-SSH** icon in the activity bar.
@@ -48,6 +58,7 @@ Nothing is installed or left running on the server.
 ## Commands
 
 - **Heimdall-SSH: Open ~/.ssh/config** (also the file icon in the panel title; creates a commented template if the file doesn't exist)
+- **Heimdall-SSH: Check for Updates** (download icon in the panel title)
 - **Heimdall-SSH: Add Server**
 - **Heimdall-SSH: Reconnect All**
 - **Heimdall-SSH: Forget Saved Host Keys**
@@ -69,7 +80,7 @@ npm run typecheck
 Press **F5** to launch an Extension Development Host. To package and install locally:
 
 ```sh
-npx vsce package --allow-missing-repository --skip-license --no-dependencies -o heimdall-ssh-0.1.0.vsix
+npx vsce package --no-dependencies -o heimdall-ssh-0.1.0.vsix
 code --install-extension heimdall-ssh-0.1.0.vsix --force
 ```
 

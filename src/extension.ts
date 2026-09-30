@@ -4,6 +4,7 @@ import { ServerConfig } from './monitor';
 import { existsSync, mkdirSync, unwatchFile, watchFile, writeFileSync } from 'fs';
 import { dirname } from 'path';
 import { SSH_CONFIG_PATH } from './sshConfig';
+import { checkForUpdate } from './updater';
 import { ServersView } from './view';
 
 export function activate(ctx: vscode.ExtensionContext) {
@@ -19,6 +20,7 @@ export function activate(ctx: vscode.ExtensionContext) {
       view.reconnectAll();
     }),
     vscode.commands.registerCommand('heimdall.openSshConfig', openSshConfig),
+    vscode.commands.registerCommand('heimdall.checkForUpdate', () => checkForUpdate(ctx)),
     vscode.commands.registerCommand('heimdall.addServer', () => addServer(ctx)),
     { dispose: () => { view.dispose(); unwatchFile(SSH_CONFIG_PATH); } },
   );
