@@ -18,13 +18,15 @@
     },
     "commands": [
       { "command": "heimdall.addServer", "title": "Heimdall-SSH: Add Server", "icon": "$(add)" },
+      { "command": "heimdall.openSshConfig", "title": "Heimdall-SSH: Open ~/.ssh/config", "icon": "$(go-to-file)" },
       { "command": "heimdall.refresh", "title": "Heimdall-SSH: Reconnect All", "icon": "$(refresh)" },
       { "command": "heimdall.forgetHostKeys", "title": "Heimdall-SSH: Forget Saved Host Keys" }
     ],
     "menus": {
       "view/title": [
         { "command": "heimdall.addServer", "when": "view == heimdall.servers", "group": "navigation@1" },
-        { "command": "heimdall.refresh", "when": "view == heimdall.servers", "group": "navigation@2" }
+        { "command": "heimdall.openSshConfig", "when": "view == heimdall.servers", "group": "navigation@2" },
+        { "command": "heimdall.refresh", "when": "view == heimdall.servers", "group": "navigation@3" }
       ]
     },
     "configuration": {

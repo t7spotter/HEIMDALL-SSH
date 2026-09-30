@@ -47,6 +47,7 @@ Nothing is installed or left running on the server.
 
 ## Commands
 
+- **Heimdall-SSH: Open ~/.ssh/config** (also the file icon in the panel title; creates a commented template if the file doesn't exist)
 - **Heimdall-SSH: Add Server**
 - **Heimdall-SSH: Reconnect All**
 - **Heimdall-SSH: Forget Saved Host Keys**

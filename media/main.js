@@ -47,8 +47,8 @@
     if (!servers.length) {
       const d = document.createElement('div');
       d.className = 'empty';
-      d.innerHTML = 'No servers found in ~/.ssh/config.<br><button class="add">Add server</button>';
-      d.querySelector('button').onclick = () => vscode.postMessage({ type: 'add' });
+      d.innerHTML = 'No servers found in ~/.ssh/config.<br><button class="add" data-a="add">Add server</button> <button class="add" data-a="openConfig">Open ssh config</button>';
+      d.querySelectorAll('button').forEach((b) => (b.onclick = () => vscode.postMessage({ type: b.dataset.a })));
       root.appendChild(d);
     }
   }

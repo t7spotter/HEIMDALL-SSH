@@ -46,6 +46,7 @@ export class ServersView implements vscode.WebviewViewProvider {
 
     view.webview.onDidReceiveMessage((m) => {
       if (m.type === 'ready') this.pushAll();
+      else if (m.type === 'openConfig') vscode.commands.executeCommand('heimdall.openSshConfig');
       else if (m.type === 'add') vscode.commands.executeCommand('heimdall.addServer');
       else if (m.type === 'terminal') this.openTerminal(m.id);
       else if (m.type === 'remove') this.remove(m.id);

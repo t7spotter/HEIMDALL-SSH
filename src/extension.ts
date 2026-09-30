@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
 import { randomUUID } from 'crypto';
 import { ServerConfig } from './monitor';
-import { unwatchFile, watchFile } from 'fs';
+import { existsSync, mkdirSync, unwatchFile, watchFile, writeFileSync } from 'fs';
+import { dirname } from 'path';
 import { SSH_CONFIG_PATH } from './sshConfig';
 import { ServersView } from './view';
 
@@ -17,9 +18,22 @@ export function activate(ctx: vscode.ExtensionContext) {
       vscode.window.showInformationMessage('Heimdall-SSH: saved host keys cleared.');
       view.reconnectAll();
     }),
+    vscode.commands.registerCommand('heimdall.openSshConfig', openSshConfig),
     vscode.commands.registerCommand('heimdall.addServer', () => addServer(ctx)),
     { dispose: () => { view.dispose(); unwatchFile(SSH_CONFIG_PATH); } },
   );
+}
+
+async function openSshConfig() {
+  if (!existsSync(SSH_CONFIG_PATH)) {
+    mkdirSync(dirname(SSH_CONFIG_PATH), { recursive: true, mode: 0o700 });
+    writeFileSync(
+      SSH_CONFIG_PATH,
+      '# Hosts listed here show up in Heimdall-SSH automatically.\n#\n# Host myserver\n#   HostName 203.0.113.10\n#   User root\n#   Port 22\n#   IdentityFile ~/.ssh/id_ed25519\n',
+      { mode: 0o600 },
+    );
+  }
+  await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(vscode.Uri.file(SSH_CONFIG_PATH)));
 }
 
 async function addServer(ctx: vscode.ExtensionContext) {
