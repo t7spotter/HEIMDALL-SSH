@@ -60,7 +60,3 @@ button { cursor: pointer; font: inherit; color: inherit; }
   background: linear-gradient(145deg, hsl(var(--h) 62% 45%), hsl(calc(var(--h) + 35) 58% 30%)); box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .35); transition: transform .12s; }
 .swatches i:hover { transform: scale(1.2); box-shadow: 0 0 0 2px #fff; }
 .swatches i.auto { background: rgba(0, 0, 0, .35); }
-
-#footer { display: flex; justify-content: space-between; align-items: center; padding: 4px 4px 12px; font-size: 11px; opacity: .8; }
-#footer button { background: none; border: 1px solid var(--vscode-widget-border, rgba(128, 128, 128, .4)); border-radius: 6px; padding: 3px 9px; font-size: 11px; }
-#footer button:hover { background: var(--vscode-toolbar-hoverBackground); }

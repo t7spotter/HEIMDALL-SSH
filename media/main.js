@@ -140,17 +140,9 @@
     }
   }
 
-  function footer(version) {
-    const f = document.getElementById('footer');
-    if (f.dataset.v === version) return;
-    f.dataset.v = version;
-    f.innerHTML = `<span>Heimdall-SSH v${esc(version)}</span><button>⟳ Check for updates</button>`;
-    f.querySelector('button').onclick = () => vscode.postMessage({ type: 'checkUpdate' });
-  }
-
   window.addEventListener('message', (e) => {
     const m = e.data;
-    if (m.type === 'servers') { sync(m.servers); footer(m.version); }
+    if (m.type === 'servers') sync(m.servers);
     else if (m.type === 'update') update(m);
   });
   vscode.postMessage({ type: 'ready' });
