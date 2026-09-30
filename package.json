@@ -1,9 +1,9 @@
 {
-  "name": "yomo",
-  "displayName": "Yomo – SSH Server Stats",
+  "name": "heimdall",
+  "displayName": "Heimdall – SSH Server Stats",
   "description": "Minimal live CPU, memory, load, disk and network stats for your SSH servers, right in the sidebar.",
   "version": "0.1.0",
-  "publisher": "yomo",
+  "publisher": "heimdall",
   "license": "MIT",
   "engines": { "vscode": "^1.85.0" },
   "categories": ["Other"],
@@ -11,32 +11,32 @@
   "activationEvents": [],
   "contributes": {
     "viewsContainers": {
-      "activitybar": [{ "id": "yomo", "title": "Yomo", "icon": "media/icon.svg" }]
+      "activitybar": [{ "id": "heimdall", "title": "Heimdall", "icon": "media/icon.svg" }]
     },
     "views": {
-      "yomo": [{ "type": "webview", "id": "yomo.servers", "name": "Servers" }]
+      "heimdall": [{ "type": "webview", "id": "heimdall.servers", "name": "Servers" }]
     },
     "commands": [
-      { "command": "yomo.addServer", "title": "Yomo: Add Server", "icon": "$(add)" },
-      { "command": "yomo.refresh", "title": "Yomo: Reconnect All", "icon": "$(refresh)" },
-      { "command": "yomo.forgetHostKeys", "title": "Yomo: Forget Saved Host Keys" }
+      { "command": "heimdall.addServer", "title": "Heimdall: Add Server", "icon": "$(add)" },
+      { "command": "heimdall.refresh", "title": "Heimdall: Reconnect All", "icon": "$(refresh)" },
+      { "command": "heimdall.forgetHostKeys", "title": "Heimdall: Forget Saved Host Keys" }
     ],
     "menus": {
       "view/title": [
-        { "command": "yomo.addServer", "when": "view == yomo.servers", "group": "navigation@1" },
-        { "command": "yomo.refresh", "when": "view == yomo.servers", "group": "navigation@2" }
+        { "command": "heimdall.addServer", "when": "view == heimdall.servers", "group": "navigation@1" },
+        { "command": "heimdall.refresh", "when": "view == heimdall.servers", "group": "navigation@2" }
       ]
     },
     "configuration": {
-      "title": "Yomo",
+      "title": "Heimdall",
       "properties": {
-        "yomo.refreshInterval": {
+        "heimdall.refreshInterval": {
           "type": "number",
           "default": 3,
           "minimum": 1,
           "description": "Seconds between stat updates."
         },
-        "yomo.servers": {
+        "heimdall.servers": {
           "type": "array",
           "default": [],
           "description": "Extra servers to monitor (hosts in ~/.ssh/config are picked up automatically). Passwords are kept in VS Code's secret storage, never here.",

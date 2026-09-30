@@ -147,7 +147,7 @@ export class Monitor {
       .on('error', (e) => {
         const hostKeyRejected = /host denied|handshake failed/i.test(e.message);
         this.fail(gen, hostKeyRejected
-          ? 'Host key rejected or changed (run "Yomo: Forget Saved Host Keys" if expected)'
+          ? 'Host key rejected or changed (run "Heimdall: Forget Saved Host Keys" if expected)'
           : e.message);
       })
       .on('close', () => this.fail(gen, 'Connection closed'))

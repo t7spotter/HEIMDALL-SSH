@@ -13,7 +13,7 @@ export class ServersView implements vscode.WebviewViewProvider {
   constructor(private ctx: vscode.ExtensionContext) {}
 
   private servers(): ServerConfig[] {
-    const manual = vscode.workspace.getConfiguration('yomo').get<ServerConfig[]>('servers', []);
+    const manual = vscode.workspace.getConfiguration('heimdall').get<ServerConfig[]>('servers', []);
     const fromSsh = readSshConfig().map<ServerConfig>((h) => ({
       id: `ssh:${h.alias}`,
       name: h.alias,
@@ -46,7 +46,7 @@ export class ServersView implements vscode.WebviewViewProvider {
 
     view.webview.onDidReceiveMessage((m) => {
       if (m.type === 'ready') this.pushAll();
-      else if (m.type === 'add') vscode.commands.executeCommand('yomo.addServer');
+      else if (m.type === 'add') vscode.commands.executeCommand('heimdall.addServer');
       else if (m.type === 'terminal') this.openTerminal(m.id);
       else if (m.type === 'remove') this.remove(m.id);
     });
@@ -66,13 +66,13 @@ export class ServersView implements vscode.WebviewViewProvider {
       if (m && JSON.stringify(m.cfg) !== JSON.stringify(cfg)) { m.stop(); m = undefined; }
       if (!m) {
         m = new Monitor(cfg, {
-          getPassword: async (id) => this.ctx.secrets.get(`yomo.pw.${id}`),
-          getHostKey: (k) => this.ctx.globalState.get<Record<string, string>>('yomo.hostKeys', {})[k],
+          getPassword: async (id) => this.ctx.secrets.get(`heimdall.pw.${id}`),
+          getHostKey: (k) => this.ctx.globalState.get<Record<string, string>>('heimdall.hostKeys', {})[k],
           setHostKey: (k, fp) => {
-            const all = this.ctx.globalState.get<Record<string, string>>('yomo.hostKeys', {});
-            void this.ctx.globalState.update('yomo.hostKeys', { ...all, [k]: fp });
+            const all = this.ctx.globalState.get<Record<string, string>>('heimdall.hostKeys', {});
+            void this.ctx.globalState.update('heimdall.hostKeys', { ...all, [k]: fp });
           },
-          intervalMs: () => Math.max(1, vscode.workspace.getConfiguration('yomo').get<number>('refreshInterval', 3)) * 1000,
+          intervalMs: () => Math.max(1, vscode.workspace.getConfiguration('heimdall').get<number>('refreshInterval', 3)) * 1000,
           onUpdate: (id, status, stats) => {
             const snap = { status, stats: stats ?? this.latest.get(id)?.stats };
             this.latest.set(id, snap);
@@ -123,8 +123,8 @@ export class ServersView implements vscode.WebviewViewProvider {
     if (!c || c.sshAlias || c.local) return;
     const ok = await vscode.window.showWarningMessage(`Remove "${c.name}"?`, { modal: true }, 'Remove');
     if (ok !== 'Remove') return;
-    const cfg = vscode.workspace.getConfiguration('yomo');
+    const cfg = vscode.workspace.getConfiguration('heimdall');
     await cfg.update('servers', this.servers().filter((s) => s.id !== id), vscode.ConfigurationTarget.Global);
-    await this.ctx.secrets.delete(`yomo.pw.${id}`);
+    await this.ctx.secrets.delete(`heimdall.pw.${id}`);
   }
 }

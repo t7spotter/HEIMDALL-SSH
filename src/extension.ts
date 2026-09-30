@@ -9,15 +9,15 @@ export function activate(ctx: vscode.ExtensionContext) {
   const view = new ServersView(ctx);
   watchFile(SSH_CONFIG_PATH, { interval: 2000 }, () => view.syncMonitors());
   ctx.subscriptions.push(
-    vscode.window.registerWebviewViewProvider('yomo.servers', view, { webviewOptions: { retainContextWhenHidden: true } }),
-    vscode.workspace.onDidChangeConfiguration((e) => e.affectsConfiguration('yomo') && view.syncMonitors()),
-    vscode.commands.registerCommand('yomo.refresh', () => view.reconnectAll()),
-    vscode.commands.registerCommand('yomo.forgetHostKeys', async () => {
-      await ctx.globalState.update('yomo.hostKeys', {});
-      vscode.window.showInformationMessage('Yomo: saved host keys cleared.');
+    vscode.window.registerWebviewViewProvider('heimdall.servers', view, { webviewOptions: { retainContextWhenHidden: true } }),
+    vscode.workspace.onDidChangeConfiguration((e) => e.affectsConfiguration('heimdall') && view.syncMonitors()),
+    vscode.commands.registerCommand('heimdall.refresh', () => view.reconnectAll()),
+    vscode.commands.registerCommand('heimdall.forgetHostKeys', async () => {
+      await ctx.globalState.update('heimdall.hostKeys', {});
+      vscode.window.showInformationMessage('Heimdall: saved host keys cleared.');
       view.reconnectAll();
     }),
-    vscode.commands.registerCommand('yomo.addServer', () => addServer(ctx)),
+    vscode.commands.registerCommand('heimdall.addServer', () => addServer(ctx)),
     { dispose: () => { view.dispose(); unwatchFile(SSH_CONFIG_PATH); } },
   );
 }
@@ -54,9 +54,9 @@ async function addServer(ctx: vscode.ExtensionContext) {
   if (cfg.auth === 'password') {
     const pw = await vscode.window.showInputBox({ title: 'Password', password: true, ignoreFocusOut: true });
     if (!pw) return;
-    await ctx.secrets.store(`yomo.pw.${id}`, pw);
+    await ctx.secrets.store(`heimdall.pw.${id}`, pw);
   }
-  const conf = vscode.workspace.getConfiguration('yomo');
+  const conf = vscode.workspace.getConfiguration('heimdall');
   await conf.update('servers', [...conf.get<ServerConfig[]>('servers', []), { id, ...cfg }], vscode.ConfigurationTarget.Global);
 }
 
