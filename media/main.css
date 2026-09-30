@@ -31,17 +31,16 @@ button { cursor: pointer; font: inherit; color: inherit; }
 .icons button { background: none; border: 0; padding: 3px 7px; border-radius: 6px; font-size: 12px; opacity: .6; transition: background .15s, opacity .15s; }
 .icons button:hover { opacity: 1; background: rgba(255, 255, 255, .14); }
 
-.panel { background: rgba(0, 0, 0, .22); padding: 8px 4px 4px; }
-.gauges { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px 0; }
-@media (min-width: 300px) { .gauges { grid-template-columns: repeat(4, 1fr); } }
+.panel { background: rgba(0, 0, 0, .22); padding: 8px 2px 4px; }
+.gauges { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .gauge { text-align: center; min-width: 0; }
-.gauge .lbl { font-size: 11px; opacity: .75; }
-.gauge .sub { font-size: 10px; opacity: .55; margin-top: -6px; }
-.gauge svg { width: 100%; max-width: 72px; display: block; margin: 0 auto; overflow: visible; }
+.gauge .lbl { font-size: 10px; opacity: .75; }
+.gauge .sub { font-size: 9px; opacity: .55; margin-top: -6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gauge svg { width: 100%; max-width: 64px; display: block; margin: 0 auto; overflow: visible; }
 .gauge .track { stroke: rgba(255, 255, 255, .12); fill: none; stroke-width: 7; stroke-linecap: round; }
 .gauge .fill { fill: none; stroke-width: 7; stroke-linecap: round; transition: stroke-dasharray .6s cubic-bezier(.3, .8, .3, 1); }
 .gauge .knob { fill: #fff; transition: cx .6s cubic-bezier(.3, .8, .3, 1), cy .6s cubic-bezier(.3, .8, .3, 1); }
-.gauge text { fill: #fff; font-size: 20px; font-weight: 600; text-anchor: middle; }
+.gauge text { fill: #fff; font-size: 22px; font-weight: 600; text-anchor: middle; }
 
 .foot { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 8px 10px 10px; font-size: 10.5px; background: rgba(0, 0, 0, .22); }
 .foot div { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
