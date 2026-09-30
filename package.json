@@ -1,0 +1,77 @@
+{
+  "name": "yomo",
+  "displayName": "Yomo – SSH Server Stats",
+  "description": "Minimal live CPU, memory, load, disk and network stats for your SSH servers, right in the sidebar.",
+  "version": "0.1.0",
+  "publisher": "yomo",
+  "license": "MIT",
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Other"],
+  "main": "./dist/extension.js",
+  "activationEvents": [],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [{ "id": "yomo", "title": "Yomo", "icon": "media/icon.svg" }]
+    },
+    "views": {
+      "yomo": [{ "type": "webview", "id": "yomo.servers", "name": "Servers" }]
+    },
+    "commands": [
+      { "command": "yomo.addServer", "title": "Yomo: Add Server", "icon": "$(add)" },
+      { "command": "yomo.refresh", "title": "Yomo: Reconnect All", "icon": "$(refresh)" },
+      { "command": "yomo.forgetHostKeys", "title": "Yomo: Forget Saved Host Keys" }
+    ],
+    "menus": {
+      "view/title": [
+        { "command": "yomo.addServer", "when": "view == yomo.servers", "group": "navigation@1" },
+        { "command": "yomo.refresh", "when": "view == yomo.servers", "group": "navigation@2" }
+      ]
+    },
+    "configuration": {
+      "title": "Yomo",
+      "properties": {
+        "yomo.refreshInterval": {
+          "type": "number",
+          "default": 3,
+          "minimum": 1,
+          "description": "Seconds between stat updates."
+        },
+        "yomo.servers": {
+          "type": "array",
+          "default": [],
+          "description": "Servers to monitor. Passwords are kept in VS Code's secret storage, never here.",
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "host", "username"],
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "host": { "type": "string" },
+              "port": { "type": "number", "default": 22 },
+              "username": { "type": "string" },
+              "auth": { "enum": ["agent", "key", "password"], "default": "agent" },
+              "keyPath": { "type": "string", "description": "Private key file (auth = key)." }
+            }
+          }
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "typecheck": "tsc --noEmit",
+    "package": "npm run typecheck && node esbuild.js --production && vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/ssh2": "^1.15.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.0.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.5.0"
+  },
+  "dependencies": {
+    "ssh2": "^1.16.0"
+  }
+}
