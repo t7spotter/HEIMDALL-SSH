@@ -9,6 +9,7 @@ Each server gets a card with:
 - **Disk I/O** throughput and IOPS
 - OS, uptime and latency, plus a status dot (connecting / online / error)
 - A button to open an SSH terminal to that server
+- A 🎨 button to give each machine its own colour (saved per machine; **A** resets to automatic)
 
 The machine VS Code is running on is shown too, as the first card.
 

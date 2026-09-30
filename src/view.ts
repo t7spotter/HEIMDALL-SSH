@@ -42,10 +42,12 @@ export class ServersView implements vscode.WebviewViewProvider {
     view.webview.html = `<!doctype html><html><head><meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${view.webview.cspSource}; script-src 'nonce-${nonce}';">
 <link rel="stylesheet" href="${uri('main.css')}"></head>
-<body><div id="root"></div><script nonce="${nonce}" src="${uri('main.js')}"></script></body></html>`;
+<body><div id="root"></div><div id="footer"></div><script nonce="${nonce}" src="${uri('main.js')}"></script></body></html>`;
 
     view.webview.onDidReceiveMessage((m) => {
       if (m.type === 'ready') this.syncMonitors();
+      else if (m.type === 'checkUpdate') vscode.commands.executeCommand('heimdall.checkForUpdate');
+      else if (m.type === 'color') this.setColor(m.id, m.hue);
       else if (m.type === 'openConfig') vscode.commands.executeCommand('heimdall.openSshConfig');
       else if (m.type === 'add') vscode.commands.executeCommand('heimdall.addServer');
       else if (m.type === 'terminal') this.openTerminal(m.id);
@@ -96,8 +98,20 @@ export class ServersView implements vscode.WebviewViewProvider {
   }
 
   private pushAll() {
-    this.view?.webview.postMessage({ type: 'servers', servers: this.servers().map(({ id, name, sshAlias }) => ({ id, name, removable: !sshAlias && id !== 'local', local: id === 'local' })) });
+    const colors = this.ctx.globalState.get<Record<string, number>>('heimdall.colors', {});
+    this.view?.webview.postMessage({
+      type: 'servers',
+      version: this.ctx.extension.packageJSON.version,
+      servers: this.servers().map(({ id, name, sshAlias }) => ({ id, name, removable: !sshAlias && id !== 'local', hue: colors[id] ?? null })),
+    });
     for (const [id, snap] of this.latest) this.view?.webview.postMessage({ type: 'update', id, ...snap });
+  }
+
+  private async setColor(id: string, hue: number | null) {
+    const colors = { ...this.ctx.globalState.get<Record<string, number>>('heimdall.colors', {}) };
+    if (typeof hue === 'number' && hue >= 0 && hue < 360) colors[id] = Math.round(hue);
+    else delete colors[id];
+    await this.ctx.globalState.update('heimdall.colors', colors);
   }
 
   private openTerminal(id: string) {

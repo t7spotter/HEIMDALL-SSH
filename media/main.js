@@ -18,18 +18,25 @@
 
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
+  const SWATCHES = [0, 25, 45, 90, 150, 175, 200, 225, 260, 290, 320, 345];
+  const autoHue = (name) => {
+    let h = 0;
+    for (const c of name) h = (h * 31 + c.charCodeAt(0)) % 360;
+    return h;
+  };
+  const applyHue = (el, s) => el.style.setProperty('--h', s.hue ?? autoHue(s.name));
+
   function makeCard(s) {
     const el = document.createElement('div');
     el.className = 'card offline';
-    let h = 0;
-    for (const c of s.name) h = (h * 31 + c.charCodeAt(0)) % 360;
-    el.style.setProperty('--h', h);
+    applyHue(el, s);
     el.innerHTML = `
       <div class="bar"></div>
       <div class="head"><span class="dot"></span>
         <div class="title"><div class="name">${esc(s.name)}</div><div class="meta">connecting…</div></div>
-        <div class="icons"><button data-a="terminal" title="Open terminal">&gt;_</button>${s.removable ? '<button data-a="remove" title="Remove">✕</button>' : ''}</div>
-      </div><div class="err" hidden></div>
+        <div class="icons"><button data-a="palette" title="Card colour">🎨</button><button data-a="terminal" title="Open terminal">&gt;_</button>${s.removable ? '<button data-a="remove" title="Remove">✕</button>' : ''}</div>
+      </div><div class="swatches" hidden>${SWATCHES.map((h) => `<i data-hue="${h}" style="--h:${h}" title="hue ${h}"></i>`).join('')}<i class="auto" data-hue="" title="Automatic">A</i></div>
+      <div class="err" hidden></div>
       <div class="body"><div class="panel">
         <div class="gauges">${gaugeHtml('cpu', 'CPU')}${gaugeHtml('mem', 'Mem')}${gaugeHtml('load', 'Load')}${gaugeHtml('disk', 'Disk')}</div></div>
         <div class="foot">
@@ -38,8 +45,17 @@
           <div class="io" data-f="io"><b>–</b><span>disk –</span></div>
         </div></div>`;
     el.addEventListener('click', (e) => {
+      const sw = e.target.closest('[data-hue]');
+      if (sw) {
+        const hue = sw.dataset.hue === '' ? null : Number(sw.dataset.hue);
+        applyHue(el, { name: el.querySelector('.name').textContent, hue });
+        el.querySelector('.swatches').hidden = true;
+        vscode.postMessage({ type: 'color', id: s.id, hue });
+        return;
+      }
       const a = e.target.closest('button')?.dataset.a;
-      if (a) vscode.postMessage({ type: a, id: s.id });
+      if (a === 'palette') el.querySelector('.swatches').hidden ^= true;
+      else if (a) vscode.postMessage({ type: a, id: s.id });
     });
     return el;
   }
@@ -50,7 +66,7 @@
     for (const s of servers) {
       let el = cards.get(s.id);
       if (!el) { el = makeCard(s); cards.set(s.id, el); }
-      else el.querySelector('.name').textContent = s.name;
+      else { el.querySelector('.name').textContent = s.name; applyHue(el, s); }
       root.appendChild(el); // keeps config order
     }
     root.querySelector('.empty')?.remove();
@@ -122,9 +138,17 @@
     }
   }
 
+  function footer(version) {
+    const f = document.getElementById('footer');
+    if (f.dataset.v === version) return;
+    f.dataset.v = version;
+    f.innerHTML = `<span>Heimdall-SSH v${esc(version)}</span><button>⟳ Check for updates</button>`;
+    f.querySelector('button').onclick = () => vscode.postMessage({ type: 'checkUpdate' });
+  }
+
   window.addEventListener('message', (e) => {
     const m = e.data;
-    if (m.type === 'servers') sync(m.servers);
+    if (m.type === 'servers') { sync(m.servers); footer(m.version); }
     else if (m.type === 'update') update(m);
   });
   vscode.postMessage({ type: 'ready' });
