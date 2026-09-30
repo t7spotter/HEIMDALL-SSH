@@ -35,7 +35,7 @@
       <div class="head"><span class="dot"></span>
         <div class="title"><div class="name">${esc(s.name)}</div><div class="meta">connecting…</div></div>
         <div class="icons"><button data-a="palette" title="Card colour">🎨</button><button data-a="terminal" title="Open terminal">&gt;_</button>${s.removable ? '<button data-a="remove" title="Remove">✕</button>' : ''}</div>
-      </div><div class="swatches" hidden>${SWATCHES.map((h) => `<i data-hue="${h}" style="--h:${h}" title="hue ${h}"></i>`).join('')}<i class="auto" data-hue="" title="Automatic">A</i></div>
+      </div><div class="swatches" hidden>${SWATCHES.map((h) => `<i data-hue="${h}" title="hue ${h}"></i>`).join('')}<i class="auto" data-hue="" title="Automatic">A</i></div>
       <div class="err" hidden></div>
       <div class="body"><div class="panel">
         <div class="gauges">${gaugeHtml('cpu', 'CPU')}${gaugeHtml('mem', 'Mem')}${gaugeHtml('load', 'Load')}${gaugeHtml('disk', 'Disk')}</div></div>
@@ -44,6 +44,8 @@
           <div class="tx" data-f="tx"><b>–</b><span>↑ –</span></div>
           <div class="io" data-f="io"><b>–</b><span>disk –</span></div>
         </div></div>`;
+    // Inline style attributes are blocked by the webview CSP, so colour the swatches via CSSOM.
+    el.querySelectorAll('i[data-hue]:not(.auto)').forEach((i) => i.style.setProperty('--h', i.dataset.hue));
     el.addEventListener('click', (e) => {
       const sw = e.target.closest('[data-hue]');
       if (sw) {
