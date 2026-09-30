@@ -12,7 +12,7 @@
        <stop offset="0" stop-color="#2be38a"/><stop offset=".5" stop-color="#f2d43b"/><stop offset="1" stop-color="#ff4d5e"/></linearGradient></defs>
      <path class="track" d="${ARC}" pathLength="100"/>
      <path class="fill" d="${ARC}" pathLength="100" stroke="url(#${id})" stroke-dasharray="0 100"/>
-     <circle class="knob" r="3.4" cx="21.72" cy="78.28"/>
+     <circle class="knob" r="3" cx="21.72" cy="78.28"/>
      <text x="50" y="58">–</text></svg><div class="sub">&nbsp;</div></div>`;
   };
 
