@@ -45,7 +45,7 @@ export class ServersView implements vscode.WebviewViewProvider {
 <body><div id="root"></div><script nonce="${nonce}" src="${uri('main.js')}"></script></body></html>`;
 
     view.webview.onDidReceiveMessage((m) => {
-      if (m.type === 'ready') this.pushAll();
+      if (m.type === 'ready') this.syncMonitors();
       else if (m.type === 'openConfig') vscode.commands.executeCommand('heimdall.openSshConfig');
       else if (m.type === 'add') vscode.commands.executeCommand('heimdall.addServer');
       else if (m.type === 'terminal') this.openTerminal(m.id);
